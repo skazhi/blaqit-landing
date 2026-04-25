@@ -257,17 +257,25 @@ footer a{color:var(--cyan);text-decoration:none}
       <div class="section-label">Контакт</div>
       <h2 class="section-title">Оставьте заявку</h2>
       <p class="section-sub">Свяжемся в течение рабочего дня, обсудим задачи и подберём решение под ваш хостел.</p>
-      <form class="form-grid" id="contact-form" action="https://functions.yandexcloud.net/d4eh4o4uorlb3mii1r8u" method="POST">
+      <form class="form-grid" id="contact-form">
         <div class="ff"><label>Название хостела</label><input type="text" name="hostel" required></div>
         <div class="ff"><label>Ваше имя</label><input type="text" name="name" required></div>
         <div class="ff"><label>Телефон</label><input type="tel" name="phone"></div>
         <div class="ff"><label>Email</label><input type="email" name="email"></div>
         <div class="ff full"><label>Расскажите о вашем хостеле</label><textarea name="comment" placeholder="Количество мест, наличие оборудования, вопросы..."></textarea></div>
-        <div class="ff full"><button type="submit" class="btn-primary form-submit">Отправить заявку →</button></div>
+        <div class="ff full"><button type="submit" class="btn-primary form-submit" id="submit-btn">Отправить заявку →</button></div>
       </form>
     </div>
   </div>
 </section>
+
+<!-- Toast уведомление -->
+<div id="toast" style="display:none;position:fixed;bottom:40px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--cyan),#0099cc);color:#07070f;padding:18px 36px;border-radius:16px;font-weight:800;font-size:16px;z-index:9999;box-shadow:0 16px 50px rgba(0,212,255,.4);animation:toastIn .4s ease">
+  ✅ Заявка отправлена! Свяжемся с вами в ближайшее время.
+</div>
+<style>
+@keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(20px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+</style>
 
 <footer>
   <div>© 2026 blaqit · <a href="mailto:blaqit@yandex.ru">blaqit@yandex.ru</a> · <a href="https://blaqit.ru">blaqit.ru</a></div>
@@ -277,6 +285,47 @@ footer a{color:var(--cyan);text-decoration:none}
 <script>
 const obs=new IntersectionObserver(e=>{e.forEach(el=>{if(el.isIntersecting)el.target.classList.add('visible')})},{threshold:.1});
 document.querySelectorAll('.fade-up').forEach(el=>obs.observe(el));
+
+// Форма — AJAX отправка без перезагрузки
+document.getElementById('contact-form').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const btn = document.getElementById('submit-btn');
+  const form = this;
+  const data = new URLSearchParams(new FormData(form));
+
+  btn.textContent = 'Отправляем...';
+  btn.disabled = true;
+
+  try {
+    // Отправляем в Telegram (через Яндекс Облако)
+    fetch('https://functions.yandexcloud.net/d4eh4o4uorlb3mii1r8u', {
+      method: 'POST',
+      body: data,
+      mode: 'no-cors'
+    });
+
+    // Дублируем на почту (Formspree)
+    fetch('https://formspree.io/f/mzdyolpd', {
+      method: 'POST',
+      body: data,
+      headers: {'Accept': 'application/json'}
+    });
+
+    // Показываем уведомление
+    const toast = document.getElementById('toast');
+    toast.style.display = 'block';
+    setTimeout(() => { toast.style.display = 'none'; }, 5000);
+
+    // Очищаем форму
+    form.reset();
+    btn.textContent = '✅ Отправлено!';
+    setTimeout(() => { btn.textContent = 'Отправить заявку →'; btn.disabled = false; }, 3000);
+  } catch(err) {
+    btn.textContent = 'Ошибка, попробуйте снова';
+    btn.disabled = false;
+  }
+});
 </script>
 </body>
 </html>
+
