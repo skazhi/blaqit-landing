@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>blaqit — CRM для хостелов с биометрическим контролем доступа</title>
+<meta name="description" content="blaqit — умная CRM для хостелов. Распознавание лиц, контроль доступа, учёт жильцов. Аналогов нет.">
+<link href="https://fonts.bunny.net/css?family=inter:300,400,500,600,700,800,900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#07070f;--bg2:#0d0d1a;--cyan:#00d4ff;--purple:#7c3aed;--white:#fff;--muted:#8892a4;--card:rgba(255,255,255,.04);--border:rgba(255,255,255,.08)}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--white);font-family:'Inter',sans-serif;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.03'/%3E%3C/svg%3E");pointer-events:none;z-index:0;opacity:.4}
+.orb{position:fixed;border-radius:50%;filter:blur(120px);pointer-events:none;z-index:0}
+.orb1{width:600px;height:600px;background:rgba(0,212,255,.07);top:-200px;right:-100px}
+.orb2{width:500px;height:500px;background:rgba(124,58,237,.08);bottom:-100px;left:-150px}
+
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:20px 40px;display:flex;align-items:center;justify-content:space-between;backdrop-filter:blur(20px);background:rgba(7,7,15,.7);border-bottom:1px solid var(--border)}
+.logo{display:flex;align-items:center;gap:14px;text-decoration:none}
+.logo svg{width:40px;height:40px}
+.logo-text{font-size:24px;font-weight:800;letter-spacing:-.5px;color:var(--white)}
+.logo-text span{color:var(--cyan)}
+.nav-cta{background:var(--cyan);color:#07070f;padding:10px 24px;border-radius:8px;font-weight:700;font-size:14px;text-decoration:none;transition:all .2s;letter-spacing:.5px}
+.nav-cta:hover{background:#fff;transform:translateY(-1px);box-shadow:0 8px 30px rgba(0,212,255,.3)}
+
+.hero{min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:120px 20px 80px;position:relative;z-index:1}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.25);padding:6px 16px;border-radius:100px;font-size:13px;color:var(--cyan);margin-bottom:32px;font-weight:500}
+.hero-badge::before{content:'';width:7px;height:7px;background:var(--cyan);border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(0,212,255,.4)}50%{opacity:.8;box-shadow:0 0 0 8px rgba(0,212,255,0)}}
+h1{font-size:clamp(32px,5.5vw,72px);font-weight:900;line-height:1.05;letter-spacing:-2px;margin-bottom:24px}
+h1 .grad{background:linear-gradient(135deg,var(--cyan),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-sub{font-size:clamp(16px,2vw,20px);color:var(--muted);max-width:620px;margin:0 auto 20px;line-height:1.7}
+.hero-slogan{font-size:clamp(14px,1.5vw,17px);color:var(--cyan);font-weight:600;margin-bottom:48px;letter-spacing:.5px}
+.hero-stats{display:flex;gap:48px;justify-content:center;flex-wrap:wrap;margin-bottom:56px}
+.stat{text-align:center}.stat-num{font-size:36px;font-weight:900;color:var(--cyan)}.stat-label{font-size:13px;color:var(--muted);margin-top:4px}
+.hero-btns{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
+.btn-primary{background:linear-gradient(135deg,var(--cyan),#0099cc);color:#07070f;padding:16px 36px;border-radius:12px;font-weight:800;font-size:16px;text-decoration:none;transition:all .3s;letter-spacing:.5px;border:none;cursor:pointer}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 16px 50px rgba(0,212,255,.35)}
+.btn-ghost{background:0 0;color:var(--white);padding:16px 36px;border-radius:12px;font-weight:600;font-size:16px;text-decoration:none;border:1px solid var(--border);transition:all .3s;cursor:pointer}
+.btn-ghost:hover{border-color:var(--cyan);color:var(--cyan)}
+
+section{padding:100px 20px;position:relative;z-index:1}
+.container{max-width:1100px;margin:0 auto}
+.section-label{font-size:12px;font-weight:700;letter-spacing:3px;color:var(--cyan);text-transform:uppercase;margin-bottom:16px}
+.section-title{font-size:clamp(28px,4vw,48px);font-weight:800;letter-spacing:-1px;margin-bottom:16px}
+.section-sub{color:var(--muted);font-size:17px;line-height:1.7;max-width:580px}
+
+.features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px;margin-top:60px}
+.fc{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:32px;transition:all .3s;position:relative;overflow:hidden}
+.fc::before{content:'';position:absolute;inset:0;border-radius:20px;background:linear-gradient(135deg,rgba(0,212,255,.05),transparent);opacity:0;transition:.3s}
+.fc:hover{border-color:rgba(0,212,255,.3);transform:translateY(-4px);box-shadow:0 20px 60px rgba(0,212,255,.1)}
+.fc:hover::before{opacity:1}
+.fc-icon{width:52px;height:52px;background:rgba(0,212,255,.1);border-radius:14px;display:flex;align-items:center;justify-content:center;margin-bottom:20px;font-size:24px}
+.fc-title{font-size:18px;font-weight:700;margin-bottom:10px}.fc-desc{color:var(--muted);font-size:15px;line-height:1.7}
+
+.numbers{background:linear-gradient(135deg,rgba(0,212,255,.05),rgba(124,58,237,.05));border:1px solid var(--border);border-radius:28px;padding:60px;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:40px;text-align:center;margin:80px 0}
+.nv{font-size:52px;font-weight:900;background:linear-gradient(135deg,var(--cyan),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1}
+.nl{color:var(--muted);font-size:14px;margin-top:8px}
+
+.usp{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:60px}
+@media(max-width:900px){.usp{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){.usp{grid-template-columns:1fr}}
+.usp-item{display:flex;gap:14px;align-items:flex-start;padding:24px;border-radius:16px;background:var(--card);border:1px solid var(--border)}
+.usp-icon{font-size:20px;flex-shrink:0;width:40px;height:40px;display:flex;align-items:center;justify-content:center;background:rgba(0,212,255,.1);border-radius:10px}
+.usp-text{font-size:15px;font-weight:500;line-height:1.6}
+
+.packages{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:24px;margin-top:60px}
+.pkg{background:var(--card);border:1px solid var(--border);border-radius:24px;padding:40px;position:relative;transition:.3s}
+.pkg.feat{border-color:var(--cyan);background:rgba(0,212,255,.05)}
+.pkg-badge{position:absolute;top:-14px;left:40px;background:linear-gradient(135deg,var(--cyan),#0099cc);color:#07070f;font-size:12px;font-weight:800;padding:4px 16px;border-radius:100px;letter-spacing:1px}
+.pkg-name{font-size:26px;font-weight:800;margin-bottom:8px}
+.pkg-price{font-size:20px;font-weight:700;color:var(--cyan);margin-bottom:8px}
+.pkg-note{color:var(--muted);font-size:14px;margin-bottom:28px}
+.pkg ul{list-style:none;margin-bottom:36px}
+.pkg li{padding:10px 0;border-bottom:1px solid var(--border);font-size:15px;display:flex;gap:10px;align-items:flex-start;color:rgba(255,255,255,.85)}
+.pkg li::before{content:'✓';color:var(--cyan);font-weight:700;flex-shrink:0}
+.pkg li:last-child{border-bottom:none}
+
+.form-section{background:var(--bg2);border-radius:32px;padding:60px;border:1px solid var(--border)}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:40px}
+.ff{display:flex;flex-direction:column;gap:8px}.ff.full{grid-column:1/-1}
+.ff label{font-size:13px;font-weight:600;color:var(--muted);letter-spacing:.5px;text-transform:uppercase}
+.ff input,.ff textarea{background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:12px;padding:14px 18px;color:var(--white);font-size:15px;font-family:'Inter',sans-serif;transition:.2s;outline:none;resize:vertical}
+.ff input:focus,.ff textarea:focus{border-color:var(--cyan);background:rgba(0,212,255,.05);box-shadow:0 0 0 3px rgba(0,212,255,.1)}
+.ff textarea{min-height:120px}
+.form-submit{margin-top:8px;width:100%;padding:18px;font-size:17px;font-weight:800}
+
+footer{border-top:1px solid var(--border);padding:40px 20px;text-align:center;color:var(--muted);font-size:14px;position:relative;z-index:1}
+footer a{color:var(--cyan);text-decoration:none}
+
+.fade-up{opacity:0;transform:translateY(30px);transition:opacity .7s ease,transform .7s ease}
+.fade-up.visible{opacity:1;transform:none}
+
+@media(max-width:768px){nav{padding:16px 20px}.numbers{padding:40px 24px}.form-section{padding:32px 24px}.form-grid{grid-template-columns:1fr}.hero-stats{gap:24px}}
+</style>
+</head>
+<body>
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+
+<nav>
+  <a href="#" class="logo">
+    <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M8 24c0-9 6-16 14-16 2 0 3.5.5 5 1.5C25 11 23.5 14 23 17c-.5 3 0 5 1 7-2 1-4.5 2-7 2-5 0-9-2-9-2z" fill="url(#w1)" opacity=".9"/>
+      <path d="M27 9.5c1.5 2 2.5 5 2.5 8.5 0 5-2 9-5 11" stroke="url(#w2)" stroke-width="2" stroke-linecap="round" fill="none"/>
+      <path d="M13 22c2 2 5 3.5 9 3.5" stroke="rgba(255,255,255,.2)" stroke-width="1" stroke-linecap="round" fill="none"/>
+      <ellipse cx="22" cy="14" rx="1.2" ry="1.4" fill="#00d4ff"/>
+      <path d="M8 24c1 3 4 6 8 7.5" stroke="url(#w2)" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+      <path d="M30 17c.5-1 1.5-2 3-2.5" stroke="#00d4ff" stroke-width="1.2" stroke-linecap="round" opacity=".5" fill="none"/>
+      <path d="M31 19c.5 0 1.5-.2 2.5-.8" stroke="#7c3aed" stroke-width="1" stroke-linecap="round" opacity=".4" fill="none"/>
+      <defs>
+        <linearGradient id="w1" x1="8" y1="8" x2="30" y2="30" gradientUnits="userSpaceOnUse"><stop stop-color="#00d4ff"/><stop offset="1" stop-color="#7c3aed"/></linearGradient>
+        <linearGradient id="w2" x1="10" y1="10" x2="30" y2="30" gradientUnits="userSpaceOnUse"><stop stop-color="#00d4ff"/><stop offset="1" stop-color="#7c3aed"/></linearGradient>
+      </defs>
+    </svg>
+    <span class="logo-text">bla<span>qit</span></span>
+  </a>
+  <a href="#contact" class="nav-cta">Оставить заявку</a>
+</nav>
+
+<div class="hero">
+  <div>
+    <div class="hero-badge">CRM для хостелов</div>
+    <h1>Спите спокойно.<br><span class="grad">Всё под контролем.</span></h1>
+    <p class="hero-sub">Ваш цифровой сотрудник, который обеспечит безопасность и полный контроль в хостеле. Без бумажных журналов. Без нелегалов. Без хаоса.</p>
+    <p class="hero-slogan">Единственная CRM-система, созданная специально для хостелов</p>
+    <div class="hero-stats">
+      <div class="stat"><div class="stat-num">5</div><div class="stat-label">хостелов</div></div>
+      <div class="stat"><div class="stat-num">10 000+</div><div class="stat-label">жильцов</div></div>
+      <div class="stat"><div class="stat-num">24/7</div><div class="stat-label">контроль</div></div>
+    </div>
+    <div class="hero-btns">
+      <a href="#contact" class="btn-primary">Получить blaqit.CRM</a>
+      <a href="#features" class="btn-ghost">Узнать больше</a>
+    </div>
+  </div>
+</div>
+
+<section id="features">
+  <div class="container">
+    <div class="fade-up">
+      <div class="section-label">Возможности</div>
+      <h2 class="section-title">Полный контроль хостела<br>из одного окна</h2>
+      <p class="section-sub">blaqit.CRM заменяет отдел охраны, бумажные журналы, таблицы и устаревшее ПО. Одна система — полная безопасность.</p>
+    </div>
+    <div class="features-grid">
+      <div class="fc fade-up">
+        <div class="fc-icon">👁️</div>
+        <div class="fc-title">Биометрический доступ</div>
+        <div class="fc-desc">Жилец подходит — турникет открывается. Распознавание лица за долю секунды. Карты и пин-коды не нужны.</div>
+      </div>
+      <div class="fc fade-up">
+        <div class="fc-icon">📡</div>
+        <div class="fc-title">Кто внутри прямо сейчас</div>
+        <div class="fc-desc">Live-статус каждого жильца: в хостеле или нет. Отсутствующие больше нормы — автоматически помечаются.</div>
+      </div>
+      <div class="fc fade-up">
+        <div class="fc-icon">🔒</div>
+        <div class="fc-title">Блокировка за 1 клик</div>
+        <div class="fc-desc">Нарушитель? Должник? Один клик в браузере — доступ закрыт. Без звонка охране, без задержек.</div>
+      </div>
+      <div class="fc fade-up">
+        <div class="fc-icon">🛡️</div>
+        <div class="fc-title">Отсутствие нелегалов</div>
+        <div class="fc-desc">Контроль регистрации и миграционного учёта. Сроки патентов, автоуведомления — ни один просроченный документ не пройдёт мимо.</div>
+      </div>
+      <div class="fc fade-up">
+        <div class="fc-icon">🧺</div>
+        <div class="fc-title">Контроль имущества</div>
+        <div class="fc-desc">Учёт выдачи и возврата постельного белья. Соблюдение санитарных норм по замене. Журнал инвентаризации.</div>
+      </div>
+      <div class="fc fade-up">
+        <div class="fc-icon">💬</div>
+        <div class="fc-title">Личный кабинет и мессенджер</div>
+        <div class="fc-desc">Встроенный мессенджер для решения вопросов с заказчиками. Независим от блокировок внешних сервисов.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section style="padding:0 20px">
+  <div class="container">
+    <div class="numbers fade-up">
+      <div><div class="nv">5</div><div class="nl">хостелов работают на blaqit.CRM</div></div>
+      <div><div class="nv">10к+</div><div class="nl">жильцов под контролем</div></div>
+      <div><div class="nv">0</div><div class="nl">бумажных журналов</div></div>
+      <div><div class="nv">0</div><div class="nl">нелегалов</div></div>
+    </div>
+  </div>
+</section>
+
+<section id="why">
+  <div class="container">
+    <div class="fade-up">
+      <div class="section-label">Почему blaqit</div>
+      <h2 class="section-title">То, чего нет ни у кого</h2>
+      <p class="section-sub">blaqit.CRM — единственная CRM, созданная изнутри хостельного бизнеса. Мы знаем каждую боль, потому что сами через неё прошли.</p>
+    </div>
+    <div class="usp fade-up">
+      <div class="usp-item"><div class="usp-icon">🇷🇺</div><div class="usp-text">Серверы в России. Данные под защитой ФЗ-152. Полное соответствие законодательству.</div></div>
+      <div class="usp-item"><div class="usp-icon">🔓</div><div class="usp-text">Независим от блокировок. Не зависим от зарубежных сервисов, мессенджеров, облаков.</div></div>
+      <div class="usp-item"><div class="usp-icon">🎯</div><div class="usp-text">Нет аналогов. Ни одна CRM на рынке не предлагает встроенный биометрический контроль доступа.</div></div>
+      <div class="usp-item"><div class="usp-icon">⚡</div><div class="usp-text">Гибкость. Подстроимся под любой хостел — ваши процессы, ваши правила, наша технология.</div></div>
+      <div class="usp-item"><div class="usp-icon">📊</div><div class="usp-text">Полная аналитика. Заполняемость, динамика, присутствие — всё в графиках и цифрах.</div></div>
+      <div class="usp-item"><div class="usp-icon">🤝</div><div class="usp-text">Под ключ. От поставки оборудования до обучения персонала — берём всё на себя.</div></div>
+    </div>
+  </div>
+</section>
+
+<section id="packages">
+  <div class="container">
+    <div class="fade-up">
+      <div class="section-label">Пакеты</div>
+      <h2 class="section-title">Выберите свой формат</h2>
+      <p class="section-sub">Уже есть оборудование — подключим. Нет — поставим и настроим под ключ.</p>
+    </div>
+    <div class="packages">
+      <div class="pkg fade-up">
+        <div class="pkg-name">blaqit.CRM</div>
+        <div class="pkg-price">Стоимость по запросу</div>
+        <div class="pkg-note">Для хостелов с уже установленными терминалами</div>
+        <ul>
+          <li>Полный доступ к blaqit.CRM</li>
+          <li>Подключение вашего оборудования</li>
+          <li>Перенос данных из таблиц</li>
+          <li>Обучение персонала</li>
+          <li>Техподдержка</li>
+          <li>Обновления</li>
+        </ul>
+        <a href="#contact" class="btn-ghost" style="display:block;text-align:center;padding:14px">Узнать стоимость</a>
+      </div>
+      <div class="pkg feat fade-up">
+        <div class="pkg-badge">ПОД КЛЮЧ</div>
+        <div class="pkg-name">blaqit.CRM + оборудование</div>
+        <div class="pkg-price">Стоимость по запросу</div>
+        <div class="pkg-note">Полное оснащение хостела с нуля</div>
+        <ul>
+          <li>Терминалы распознавания лиц</li>
+          <li>Турникеты, стойки, монтаж</li>
+          <li>Прокладка кабелей, настройка</li>
+          <li>Загрузка всех жильцов в систему</li>
+          <li>Обучение персонала очно</li>
+          <li>Всё из пакета «blaqit.CRM»</li>
+          <li>Гарантия 12 месяцев</li>
+        </ul>
+        <a href="#contact" class="btn-primary" style="display:block;text-align:center;padding:14px">Получить blaqit.CRM</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="contact">
+  <div class="container">
+    <div class="form-section fade-up">
+      <div class="section-label">Контакт</div>
+      <h2 class="section-title">Оставьте заявку</h2>
+      <p class="section-sub">Свяжемся в течение рабочего дня, обсудим задачи и подберём решение под ваш хостел.</p>
+      <form class="form-grid" action="mailto:blaqit@yandex.ru" method="POST" enctype="text/plain">
+        <div class="ff"><label>Название хостела</label><input type="text" name="hostel" required></div>
+        <div class="ff"><label>Ваше имя</label><input type="text" name="name" required></div>
+        <div class="ff"><label>Телефон</label><input type="tel" name="phone"></div>
+        <div class="ff"><label>Email</label><input type="email" name="email"></div>
+        <div class="ff full"><label>Расскажите о вашем хостеле</label><textarea name="comment" placeholder="Количество мест, наличие оборудования, вопросы..."></textarea></div>
+        <div class="ff full"><button type="submit" class="btn-primary form-submit">Отправить заявку →</button></div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div>© 2026 blaqit · <a href="mailto:blaqit@yandex.ru">blaqit@yandex.ru</a> · <a href="https://blaqit.ru">blaqit.ru</a></div>
+  <div style="margin-top:8px;font-size:12px;opacity:.5">CRM для хостелов с биометрическим контролем доступа</div>
+</footer>
+
+<script>
+const obs=new IntersectionObserver(e=>{e.forEach(el=>{if(el.isIntersecting)el.target.classList.add('visible')})},{threshold:.1});
+document.querySelectorAll('.fade-up').forEach(el=>obs.observe(el));
+</script>
+</body>
+</html>
