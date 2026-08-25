@@ -1,0 +1,1 @@
+function o(i){let t=i.replace(/\D/g,"");t.startsWith("8")&&(t="7"+t.slice(1)),t.startsWith("7")||(t="7"+t),t=t.slice(0,11);const e=t.slice(1,4),n=t.slice(4,7),c=t.slice(7,9),l=t.slice(9,11);let s="+7";return e&&(s+=`-${e}`),n&&(s+=`-${n}`),c&&(s+=`-${c}`),l&&(s+=`-${l}`),s}function r(i){return!i||i==="+"?"+7":o(i)}export{r as h};

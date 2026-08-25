@@ -1,0 +1,10 @@
+<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="blaqit">
+  <!-- Иконка вкладки: золотая плитка с классической «q» — тот же знак, что на
+       blaqit.ru, чтобы сайт, CRM и канал опознавались как одно. Буква, а не
+       рисунок: в 16 пикселях (размер вкладки) любой рисунок заплывает.
+       Правила — docs/BRANDBOOK.md. -->
+  <rect width="32" height="32" rx="6" fill="#dcae4c"/>
+  <text x="16" y="23" text-anchor="middle"
+        font-family="Arial Black,Arial,Helvetica,sans-serif"
+        font-size="22" font-weight="900" fill="#241a05">q</text>
+</svg>
