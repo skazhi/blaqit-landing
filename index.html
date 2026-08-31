@@ -247,6 +247,32 @@
   .ff textarea { min-height:120px; }
   #submit-btn { width:100%; justify-content:center; margin-top:4px; }
 
+  /* Согласие на обработку ПД. Обычный текст, не «капсом», как подписи полей:
+     это то, что человек читает, а не название графы. */
+  /* Селектор с `label`, иначе .ff label выше по весу и превращает согласие в
+     КАПС мелким шрифтом — как подпись графы, а не как текст для чтения. */
+  .ff label.consent-row { display:flex; gap:11px; align-items:flex-start; cursor:pointer;
+    font-size:0.88rem; color:var(--ink-2); line-height:1.5; text-transform:none;
+    letter-spacing:normal; font-weight:400; }
+  .ff label.consent-row input { width:18px; height:18px; flex:0 0 auto; margin-top:1px; accent-color:var(--gold); }
+  .ff label.consent-row a { color:var(--gold); text-decoration:underline; }
+  .ff.missing label.consent-row { color:var(--risk); }
+  .ff.missing label.consent-row input { outline:2px solid var(--risk); outline-offset:2px; }
+
+  /* Баннер про cookie. Отказаться так же просто, как согласиться: кнопка
+     «Только необходимые» равноправная, а не серая приписка внизу. */
+  #cookie-bar { display:none; position:fixed; left:16px; right:16px; bottom:16px; z-index:9998;
+    background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:16px 18px;
+    box-shadow:0 18px 60px rgba(0,0,0,0.55); max-width:760px; margin:0 auto;
+    gap:14px; align-items:center; justify-content:space-between; flex-wrap:wrap; }
+  #cookie-bar p { color:var(--ink-2); font-size:0.88rem; margin:0; flex:1 1 320px; line-height:1.5; }
+  #cookie-bar a { color:var(--gold); text-decoration:underline; }
+  #cookie-bar .cb-actions { display:flex; gap:10px; flex-wrap:wrap; }
+  #cookie-bar button { font:inherit; font-size:0.86rem; font-weight:650; cursor:pointer;
+    border-radius:9px; padding:10px 16px; border:1px solid var(--line); background:transparent; color:var(--ink-2); }
+  #cookie-bar button.primary { background:linear-gradient(180deg,var(--gold-hi),var(--gold));
+    color:#241a05; border-color:transparent; }
+
   footer { border-top:1px solid var(--line); padding:40px 0 56px; color:var(--muted); font-size:0.9rem; }
   .foot-inner { display:flex; justify-content:space-between; gap:20px; flex-wrap:wrap; align-items:center; }
   footer a { color:var(--gold); }
@@ -625,6 +651,15 @@
         <div class="ff"><label>Телефон</label><input type="tel" name="phone"></div>
         <div class="ff"><label>Email</label><input type="email" name="email"></div>
         <div class="ff full"><label>Расскажите о вашем хостеле</label><textarea name="comment" placeholder="Количество мест, наличие оборудования, вопросы..."></textarea></div>
+        <!-- Галочка НЕ предзаполнена: предзаполненное согласие согласием по 152-ФЗ
+             не считается — оно должно быть конкретным и осознанным. -->
+        <div class="ff full consent">
+          <label class="consent-row">
+            <input type="checkbox" id="consent" name="consent" required>
+            <span>Я согласен на обработку моих персональных данных и ознакомлен с
+              <a href="/privacy" target="_blank" rel="noopener">политикой обработки персональных данных</a></span>
+          </label>
+        </div>
         <div class="ff full"><button type="submit" class="btn btn-primary" id="submit-btn">Отправить заявку →</button></div>
       </form>
     </div>
@@ -633,10 +668,26 @@
 
 <div id="toast"></div>
 
+<!-- Баннер показывается до тех пор, пока человек не выбрал. Статистика не
+     запускается, пока он не согласился: счётчик ставит cookie, а согласие
+     на это должно быть получено заранее. -->
+<div id="cookie-bar" role="dialog" aria-label="Использование cookie">
+  <p>Мы используем файлы cookie: технические — чтобы сайт работал, и статистику
+     Яндекс.Метрики — чтобы понимать, какие страницы полезны.
+     Подробности — в <a href="/privacy">политике обработки персональных данных</a>.</p>
+  <div class="cb-actions">
+    <button type="button" id="cookie-min">Только необходимые</button>
+    <button type="button" id="cookie-ok" class="primary">Принять</button>
+  </div>
+</div>
+
 <footer>
   <div class="wrap foot-inner">
     <div class="brand"><span class="wordmark" style="font-size:1.15rem">bla<span>qit</span></span></div>
     <div>© 2026 blaqit · <a href="mailto:blaqit@yandex.ru">blaqit@yandex.ru</a> · <a href="https://t.me/Skazhi" target="_blank" rel="noopener">t.me/Skazhi</a> · <a href="tel:+79775182899">+7 977 518-28-99</a> · <a href="tel:+79661393519">+7 966 139-35-19</a> · CRM для сети хостелов</div>
+    <!-- Реквизиты оператора вписать после регистрации ООО — вместе с ними
+         заполняются плейсхолдеры {{...}} в /privacy/index.html. -->
+    <div style="margin-top:8px"><a href="/privacy">Политика обработки персональных данных</a></div>
   </div>
 </footer>
 
@@ -673,6 +724,50 @@
     });
   })();
 
+  // Редакция политики, с которой согласился человек. Менять ОДНОВРЕМЕННО с
+  // текстом в /privacy/index.html: иначе потом не докажешь, с чем он соглашался.
+  var POLICY_VERSION = '1.0';
+
+  // ── Cookie и статистика ────────────────────────────────────────────────────
+  // Счётчик грузится ТОЛЬКО после согласия: он ставит cookie, а согласие на это
+  // должно быть получено заранее. Пока номер счётчика не вписан — не грузится
+  // вообще, и это нормальное рабочее состояние, а не поломка.
+  var METRIKA_ID = '__ВПИСАТЬ_НОМЕР_СЧЁТЧИКА__';
+
+  (function () {
+    var bar = document.getElementById('cookie-bar');
+    var CHOICE = 'blaqit_cookie_choice';
+
+    function loadMetrika() {
+      if (!/^\d+$/.test(METRIKA_ID)) return; // номер не задан — счётчика нет
+      if (window.ym) return;
+      (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+      m[i].l=1*new Date();k=e.createElement(t),a=e.getElementsByTagName(t)[0];
+      k.async=1;k.src=r;a.parentNode.insertBefore(k,a)})
+      (window,document,'script','https://mc.yandex.ru/metrika/tag.js','ym');
+      window.ym(METRIKA_ID, 'init', { clickmap:true, trackLinks:true, accurateTrackBounce:true });
+    }
+
+    function remember(value) {
+      try { localStorage.setItem(CHOICE, value); } catch (e) { /* приватный режим */ }
+      bar.style.display = 'none';
+    }
+
+    var saved = null;
+    try { saved = localStorage.getItem(CHOICE); } catch (e) { /* приватный режим */ }
+
+    if (saved === 'all') { loadMetrika(); }
+    else if (saved !== 'necessary') { bar.style.display = 'flex'; }
+
+    document.getElementById('cookie-ok').addEventListener('click', function () {
+      remember('all');
+      loadMetrika();
+    });
+    document.getElementById('cookie-min').addEventListener('click', function () {
+      remember('necessary');
+    });
+  })();
+
   // Форма — отправка без перезагрузки, в Telegram через функцию в Яндекс.Облаке.
   //
   // Дубль в зарубежный Formspree убран осознанно: имя, телефон и почта человека
@@ -695,6 +790,20 @@
     var form = this;
     var toast = document.getElementById('toast');
     var data = new URLSearchParams(new FormData(form));
+    // Согласие проверяем до отправки. Браузерная проверка — удобство, а не
+    // защита: заявку можно отправить и в обход формы, поэтому такая же проверка
+    // обязана стоять в приёмной функции Яндекс.Облака.
+    var consent = document.getElementById('consent');
+    var consentBox = consent.closest('.consent');
+    if (!consent.checked) {
+      consentBox.classList.add('missing');
+      consent.focus();
+      return;
+    }
+    consentBox.classList.remove('missing');
+    data.set('consent_accepted', '1');
+    data.set('consent_policy_version', POLICY_VERSION);
+
     btn.textContent = 'Отправляем...';
     btn.disabled = true;
     try {
