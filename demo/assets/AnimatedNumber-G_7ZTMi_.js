@@ -1,1 +1,0 @@
-import{r as c,j as m}from"./index-D0j6cu2h.js";const d=({value:e,duration:s=1e3})=>{const[r,u]=c.useState(0);return c.useEffect(()=>{let t=null;const n=r,l=e,a=o=>{t||(t=o);const i=Math.min((o-t)/s,1),p=Math.floor(i*(l-n)+n);u(p),i<1&&window.requestAnimationFrame(a)};window.requestAnimationFrame(a)},[e,s]),m.jsx(m.Fragment,{children:r})};export{d as A};
