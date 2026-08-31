@@ -11,7 +11,8 @@
 <meta property="og:url" content="https://blaqit.ru">
 <meta property="og:image" content="https://blaqit.ru/og-image.jpg">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23dcae4c'/><text x='16' y='22' font-family='Arial Black,Arial,sans-serif' font-size='22' font-weight='900' fill='%23241a05' text-anchor='middle'>q</text></svg>">
-<link href="https://fonts.bunny.net/css?family=inter:300,400,500,600,700,800,900&display=swap" rel="stylesheet">
+<!-- Внешних шрифтов нет намеренно: запрос к зарубежному CDN передаёт туда
+     IP-адрес каждого посетителя сайта. Пользуемся системным шрифтом. -->
 <style>
   :root {
     color-scheme: dark;
@@ -21,7 +22,7 @@
     --ink:#f4f4f5; --ink-2:#cdcdd3; --muted:#94949c; --faint:#63636b;
     --ok:#4bbe6b; --risk:#e0705f; --risk-rgb:224,112,95;
     --maxw:1120px; --r:14px; --r-sm:9px;
-    --f-sans:"Inter","Segoe UI",system-ui,-apple-system,Arial,sans-serif;
+    --f-sans:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
     --f-mono:"SF Mono","Cascadia Code","Consolas",ui-monospace,monospace;
   }
   * { box-sizing:border-box; margin:0; padding:0; }
@@ -256,7 +257,13 @@
 
   #toast { display:none; position:fixed; bottom:36px; left:50%; transform:translateX(-50%); z-index:9999;
     background:linear-gradient(180deg,var(--gold-hi),var(--gold)); color:#241a05; padding:16px 30px; border-radius:14px;
-    font-weight:750; font-size:1rem; box-shadow:0 16px 50px rgba(var(--gold-rgb),0.4); }
+    font-weight:750; font-size:1rem; box-shadow:0 16px 50px rgba(var(--gold-rgb),0.4);
+    max-width:min(92vw,30rem); }
+  /* Заявка не ушла: не прячем это за золотой плашкой «успех» — человек должен
+     увидеть, что связи не было, и чем до нас достучаться. */
+  #toast.fail { background:var(--risk); color:#2a0f0b; box-shadow:0 16px 50px rgba(var(--risk-rgb),0.4);
+    font-weight:650; line-height:1.5; }
+  #toast.fail a { color:#2a0f0b; text-decoration:underline; white-space:nowrap; }
 </style>
 </head>
 <body>
@@ -665,25 +672,48 @@
     });
   })();
 
-  // Форма — отправка без перезагрузки (Telegram через Яндекс.Облако + почта Formspree)
+  // Форма — отправка без перезагрузки, в Telegram через функцию в Яндекс.Облаке.
+  //
+  // Дубль в зарубежный Formspree убран осознанно: имя, телефон и почта человека
+  // уезжали на сервер в США. Это трансграничная передача персональных данных
+  // (ст. 12 152-ФЗ) — о ней нужно отдельно уведомлять Роскомнадзор, — и запись
+  // данных граждан РФ мимо базы в России (ч. 5 ст. 18). Ради дубля почты такой
+  // риск не берём. Заявки принимает только российская функция.
+  //
+  // Раз канал теперь один, молчание должно быть видно. Ответ функции браузеру
+  // недоступен (mode:'no-cors' — ответ «непрозрачный»), поэтому успех подтвердить
+  // нельзя, зато обрыв и зависание ловятся по времени. Прежний код не ждал ответа
+  // вообще и писал «✅ Заявка отправлена» всегда: упавшая функция означала бы
+  // потерянного клиента, о котором никто никогда не узнает — ни он, ни мы.
+  var LEAD_URL = 'https://functions.yandexcloud.net/d4eh4o4uorlb3mii1r8u';
+  var LEAD_TIMEOUT_MS = 12000;
+
   document.getElementById('contact-form').addEventListener('submit', async function (e) {
     e.preventDefault();
     var btn = document.getElementById('submit-btn');
     var form = this;
+    var toast = document.getElementById('toast');
     var data = new URLSearchParams(new FormData(form));
     btn.textContent = 'Отправляем...';
     btn.disabled = true;
     try {
-      fetch('https://functions.yandexcloud.net/d4eh4o4uorlb3mii1r8u', { method: 'POST', body: data, mode: 'no-cors' });
-      fetch('https://formspree.io/f/mzdyolpd', { method: 'POST', body: data, headers: { 'Accept': 'application/json' } });
-      var toast = document.getElementById('toast');
+      var ctl = new AbortController();
+      var timer = setTimeout(function () { ctl.abort(); }, LEAD_TIMEOUT_MS);
+      await fetch(LEAD_URL, { method: 'POST', body: data, mode: 'no-cors', signal: ctl.signal });
+      clearTimeout(timer);
+      toast.className = '';
+      toast.textContent = '✅ Заявка отправлена! Свяжемся с вами в ближайшее время.';
       toast.style.display = 'block';
       setTimeout(function () { toast.style.display = 'none'; }, 5000);
       form.reset();
       btn.textContent = '✅ Отправлено!';
       setTimeout(function () { btn.textContent = 'Отправить заявку →'; btn.disabled = false; }, 3000);
     } catch (err) {
-      btn.textContent = 'Ошибка, попробуйте снова';
+      toast.className = 'fail';
+      toast.innerHTML = 'Заявка не ушла — связи с сервером нет. Напишите нам: ' +
+        '<a href="https://t.me/Skazhi">t.me/Skazhi</a> или <a href="tel:+79775182899">+7 977 518-28-99</a>';
+      toast.style.display = 'block';
+      btn.textContent = 'Отправить заявку →';
       btn.disabled = false;
     }
   });
