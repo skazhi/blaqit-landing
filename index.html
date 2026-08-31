@@ -263,7 +263,8 @@
      увидеть, что связи не было, и чем до нас достучаться. */
   #toast.fail { background:var(--risk); color:#2a0f0b; box-shadow:0 16px 50px rgba(var(--risk-rgb),0.4);
     font-weight:650; line-height:1.5; }
-  #toast.fail a { color:#2a0f0b; text-decoration:underline; white-space:nowrap; }
+  #toast a { text-decoration:underline; white-space:nowrap; }
+  #toast.fail a { color:#2a0f0b; }
 </style>
 </head>
 <body>
@@ -630,7 +631,7 @@
   </div>
 </section>
 
-<div id="toast">✅ Заявка отправлена! Свяжемся с вами в ближайшее время.</div>
+<div id="toast"></div>
 
 <footer>
   <div class="wrap foot-inner">
@@ -702,9 +703,13 @@
       await fetch(LEAD_URL, { method: 'POST', body: data, mode: 'no-cors', signal: ctl.signal });
       clearTimeout(timer);
       toast.className = '';
-      toast.textContent = '✅ Заявка отправлена! Свяжемся с вами в ближайшее время.';
+      // Контакты показываем и при успехе: подтвердить доставку браузер не может
+      // (ответ функции непрозрачный), а человек, чья заявка потерялась по дороге,
+      // просто решит, что мы не отвечаем, и уйдёт к другим.
+      toast.innerHTML = '✅ Заявка отправлена! Свяжемся с вами сегодня. Срочно — ' +
+        '<a href="https://t.me/Skazhi">t.me/Skazhi</a> или <a href="tel:+79775182899">+7 977 518-28-99</a>';
       toast.style.display = 'block';
-      setTimeout(function () { toast.style.display = 'none'; }, 5000);
+      setTimeout(function () { toast.style.display = 'none'; }, 9000);
       form.reset();
       btn.textContent = '✅ Отправлено!';
       setTimeout(function () { btn.textContent = 'Отправить заявку →'; btn.disabled = false; }, 3000);
