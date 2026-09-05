@@ -1,0 +1,60 @@
+name: Деплой на Selectel (российский хостинг)
+
+# Сайт лежал на GitHub Pages — это сервер в США (см. blaqit-crm/docs/DECISIONS.md,
+# запись от 31.08.2026 «Убрали все каналы, по которым данные уходили за границу»).
+# Эта задача при каждом пуше в main зеркалирует репозиторий в объектное хранилище
+# Selectel (Россия), откуда сайт раздаётся через Selectel CDN на домен blaqit.ru.
+#
+# ── Что нужно один раз в панели Selectel (без этого сайт не откроется) ─────────
+# 1. Products → S3 → Buckets → blaqit.ru → Configuration → Edit →
+#    Bucket type → Public → Save.
+# 2. Создать CDN-ресурс на этот бакет, добавить домены blaqit.ru и www.blaqit.ru,
+#    выпустить сертификат Let's Encrypt, включить «HTTPS delivery via CNAME».
+# 3. В Cloudflare (DNS для blaqit.ru) заменить записи, указывающие на GitHub Pages,
+#    на CNAME, который выдаст Selectel CDN.
+# Подробный пошаговый чек-лист — docs/DECISIONS.md в blaqit-crm, запись о переносе
+# лендинга на Selectel.
+#
+# ── Что нужно один раз в этом репозитории ──────────────────────────────────────
+# Секреты (Settings → Secrets and variables → Actions):
+#   SELECTEL_S3_ACCESS_KEY, SELECTEL_S3_SECRET_KEY
+# Значения — в файле .env.selectel в репозитории blaqit-crm (у разработчиков).
+#
+# Пока секретов нет, задача честно пишет об этом в лог и завершается успехом —
+# красный CI на пустом месте хуже пропущенной выкладки.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-selectel
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Синхронизировать с Selectel Object Storage
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.SELECTEL_S3_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.SELECTEL_S3_SECRET_KEY }}
+          AWS_DEFAULT_REGION: ru-1
+        run: |
+          set -e
+          if [ -z "$AWS_ACCESS_KEY_ID" ]; then
+            echo "::notice::Секреты SELECTEL_S3_ACCESS_KEY/SELECTEL_S3_SECRET_KEY не заданы — сайт не выложен."
+            echo "Как настроить — в шапке .github/workflows/deploy-selectel.yml."
+            exit 0
+          fi
+
+          aws --endpoint-url https://s3.ru-1.storage.selcloud.ru \
+            s3 sync . "s3://blaqit.ru" \
+            --delete \
+            --exclude ".git/*" \
+            --exclude ".github/*"
+
+          echo "::notice::Сайт обновлён в объектном хранилище Selectel (bucket blaqit.ru)."
