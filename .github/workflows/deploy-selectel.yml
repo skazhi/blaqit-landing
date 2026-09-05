@@ -5,15 +5,16 @@ name: Деплой на Selectel (российский хостинг)
 # Эта задача при каждом пуше в main зеркалирует репозиторий в объектное хранилище
 # Selectel (Россия), откуда сайт раздаётся через Selectel CDN на домен blaqit.ru.
 #
-# ── Что нужно один раз в панели Selectel (без этого сайт не откроется) ─────────
-# 1. Products → S3 → Buckets → blaqit.ru → Configuration → Edit →
-#    Bucket type → Public → Save.
-# 2. Создать CDN-ресурс на этот бакет, добавить домены blaqit.ru и www.blaqit.ru,
-#    выпустить сертификат Let's Encrypt, включить «HTTPS delivery via CNAME».
-# 3. В Cloudflare (DNS для blaqit.ru) заменить записи, указывающие на GitHub Pages,
-#    на CNAME, который выдаст Selectel CDN.
-# Подробный пошаговый чек-лист — docs/DECISIONS.md в blaqit-crm, запись о переносе
-# лендинга на Selectel.
+# ── Как всё устроено (настроено 05.09.2026) ────────────────────────────────────
+# www.blaqit.ru — сам сайт, отдаётся из бакета blaqit.ru в хранилище Selectel
+#   (бакет публичный, домен привязан на вкладке «Домены», сертификат загружен
+#   в панель РУКАМИ — автопродления при внешнем DNS у Selectel нет).
+# blaqit.ru — редирект на www с нашего сервера в России; там сертификат
+#   продлевает certbot сам.
+# ⚠️ Не ставьте бакету «политику доступа» через API: она перекрывает служебному
+# пользователю всё, кроме чтения файлов, и выкладка начинает падать с
+# AccessDenied. Публичность задаётся типом бакета в панели.
+# Подробности и причины — docs/DECISIONS.md в blaqit-crm, записи от 05.09.2026.
 #
 # ── Что нужно один раз в этом репозитории ──────────────────────────────────────
 # Секреты (Settings → Secrets and variables → Actions):
@@ -38,23 +39,26 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Синхронизировать с Selectel Object Storage
+      - name: Установить boto3
+        run: pip install --quiet boto3
+
+      # Выкладку делает свой скрипт, а не `aws s3 sync`: штатный AWS CLI
+      # рассчитан на настоящий S3 и на сторонних хранилищах спотыкается
+      # (контрольные суммы, адресация при имени бакета с точкой). Первая же
+      # попытка выкатки на нём и упала. Скрипт проверяется локально —
+      # `python deploy_to_selectel.py --dry-run`.
+      - name: Выложить сайт в Selectel
         env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.SELECTEL_S3_ACCESS_KEY }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.SELECTEL_S3_SECRET_KEY }}
-          AWS_DEFAULT_REGION: ru-1
+          SELECTEL_S3_ACCESS_KEY: ${{ secrets.SELECTEL_S3_ACCESS_KEY }}
+          SELECTEL_S3_SECRET_KEY: ${{ secrets.SELECTEL_S3_SECRET_KEY }}
         run: |
           set -e
-          if [ -z "$AWS_ACCESS_KEY_ID" ]; then
+          if [ -z "$SELECTEL_S3_ACCESS_KEY" ]; then
             echo "::notice::Секреты SELECTEL_S3_ACCESS_KEY/SELECTEL_S3_SECRET_KEY не заданы — сайт не выложен."
             echo "Как настроить — в шапке .github/workflows/deploy-selectel.yml."
             exit 0
           fi
 
-          aws --endpoint-url https://s3.ru-1.storage.selcloud.ru \
-            s3 sync . "s3://blaqit.ru" \
-            --delete \
-            --exclude ".git/*" \
-            --exclude ".github/*"
+          python deploy_to_selectel.py
 
           echo "::notice::Сайт обновлён в объектном хранилище Selectel (bucket blaqit.ru)."
