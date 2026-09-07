@@ -81,7 +81,12 @@ jobs:
           for url in https://blaqit.ru/privacy https://www.blaqit.ru/privacy; do
             ok=""
             for attempt in 1 2 3 4 5 6 7 8 9 10; do
-              if curl -fsSL --max-time 20 "$url" | grep -qF "$VERSION"; then
+              # Страница сначала скачивается целиком, и только потом ищется
+              # строка: при `curl | grep -q` grep закрывает трубу на первом же
+              # совпадении, и curl честно пишет в лог «Failure writing output»
+              # рядом со словом «ok». Читать такой лог невозможно.
+              page=$(curl -fsSL --max-time 20 "$url" || true)
+              if printf '%s' "$page" | grep -qF "$VERSION"; then
                 echo "  [ok] $url — $VERSION"
                 ok="да"
                 break
