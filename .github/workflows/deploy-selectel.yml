@@ -48,6 +48,7 @@ jobs:
       # попытка выкатки на нём и упала. Скрипт проверяется локально —
       # `python deploy_to_selectel.py --dry-run`.
       - name: Выложить сайт в Selectel
+        id: deploy
         env:
           SELECTEL_S3_ACCESS_KEY: ${{ secrets.SELECTEL_S3_ACCESS_KEY }}
           SELECTEL_S3_SECRET_KEY: ${{ secrets.SELECTEL_S3_SECRET_KEY }}
@@ -56,9 +57,41 @@ jobs:
           if [ -z "$SELECTEL_S3_ACCESS_KEY" ]; then
             echo "::notice::Секреты SELECTEL_S3_ACCESS_KEY/SELECTEL_S3_SECRET_KEY не заданы — сайт не выложен."
             echo "Как настроить — в шапке .github/workflows/deploy-selectel.yml."
+            echo "deployed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
           python deploy_to_selectel.py
 
+          echo "deployed=true" >> "$GITHUB_OUTPUT"
           echo "::notice::Сайт обновлён в объектном хранилище Selectel (bucket blaqit.ru)."
+
+      # Проверка на ЖИВОМ адресе, а не на файле в репозитории. Выкладка может
+      # пройти успешно, а посетитель увидеть старую страницу: между хранилищем и
+      # браузером стоит кэш. Сверяем редакцию политики: в репозитории и на сайте
+      # она обязана совпадать. Даём кэшу до 2,5 минут — дольше это уже не
+      # задержка, а непрошедшая выкладка, и её надо видеть красным.
+      - name: Проверить, что сайт живой и отдаёт свежую политику
+        if: steps.deploy.outputs.deployed == 'true'
+        run: |
+          set -e
+          VERSION=$(grep -o 'Редакция [0-9.]* от [0-9.]*' privacy/index.html | head -1)
+          echo "В репозитории: $VERSION"
+
+          for url in https://blaqit.ru/privacy https://www.blaqit.ru/privacy; do
+            ok=""
+            for attempt in 1 2 3 4 5 6 7 8 9 10; do
+              if curl -fsSL --max-time 20 "$url" | grep -qF "$VERSION"; then
+                echo "  [ok] $url — $VERSION"
+                ok="да"
+                break
+              fi
+              sleep 15
+            done
+            if [ -z "$ok" ]; then
+              echo "::error::$url не отдаёт «$VERSION» — страница недоступна или кэш не обновился."
+              exit 1
+            fi
+          done
+
+          echo "::notice::Политика на живом сайте: $VERSION (проверено и без www, и с www)."
