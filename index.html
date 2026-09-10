@@ -329,7 +329,7 @@
     </nav>
     <div class="nav-right">
       <a class="nav-demo" href="/demo/" target="_blank" rel="noopener">Демо</a>
-      <a class="nav-cta" href="#contact">Оставить заявку</a>
+      <a class="nav-cta" href="#contact">Связаться с нами</a>
     </div>
   </div>
 </header>
@@ -353,7 +353,7 @@
       <a class="btn btn-primary" href="/demo/" target="_blank" rel="noopener">Попробовать демо
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </a>
-      <a class="btn btn-ghost" href="#contact">Оставить заявку</a>
+      <a class="btn btn-ghost" href="#contact">Связаться с нами</a>
     </div>
     <p style="margin-top:12px;font-size:0.86rem;color:var(--faint)">Без регистрации, тестовые данные — 2 минуты, чтобы понять, как это работает</p>
     <div class="hstats">
@@ -597,7 +597,7 @@
           <li>Всё из пакета «blaqit.CRM»</li>
           <li>Гарантия на оборудование</li>
         </ul>
-        <a href="#contact" class="btn btn-primary">Оставить заявку</a>
+        <a href="#contact" class="btn btn-primary">Связаться с нами</a>
       </div>
     </div>
   </div>
@@ -644,47 +644,21 @@
   <div class="wrap">
     <div class="form-box reveal">
       <span class="eyebrow">Контакт</span>
-      <h2 style="margin-top:14px">Оставьте заявку</h2>
-      <p style="margin-top:14px;color:var(--ink-2);max-width:58ch">Свяжемся в течение рабочего дня, обсудим задачи и подберём решение под ваш хостел. Первый разговор ни к чему не обязывает.</p>
-      <p style="margin-top:10px;color:var(--muted);font-size:0.95rem">
-        Не любите звонки — напишите в <a href="https://t.me/Skazhi" style="color:var(--gold);text-decoration:underline" target="_blank" rel="noopener">Telegram</a>, ответим там же.
-        Или позвоните: <a href="tel:+79775182899" style="color:var(--gold);text-decoration:underline">+7 977 518-28-99</a> · <a href="tel:+79661393519" style="color:var(--gold);text-decoration:underline">+7 966 139-35-19</a>
+      <h2 style="margin-top:14px">Свяжитесь с нами</h2>
+      <p style="margin-top:14px;color:var(--ink-2);max-width:58ch">Напишите или позвоните — обсудим задачи и подберём решение под ваш хостел. Первый разговор ни к чему не обязывает.</p>
+      <p style="margin-top:18px;font-size:1.05rem;line-height:1.9">
+        Почта: <a href="mailto:blaqit@yandex.ru" style="color:var(--gold);text-decoration:underline">blaqit@yandex.ru</a><br>
+        Телефон: <a href="tel:+79775182899" style="color:var(--gold);text-decoration:underline">+7 977 518-28-99</a> · <a href="tel:+79661393519" style="color:var(--gold);text-decoration:underline">+7 966 139-35-19</a><br>
+        Telegram: <a href="https://t.me/Skazhi" style="color:var(--gold);text-decoration:underline" target="_blank" rel="noopener">t.me/Skazhi</a>
       </p>
-      <form class="form-grid" id="contact-form">
-        <div class="ff"><label>Название хостела</label><input type="text" name="hostel" required></div>
-        <div class="ff"><label>Ваше имя</label><input type="text" name="name" required></div>
-        <div class="ff"><label>Телефон</label><input type="tel" name="phone"></div>
-        <div class="ff"><label>Email</label><input type="email" name="email"></div>
-        <div class="ff full"><label>Расскажите о вашем хостеле</label><textarea name="comment" placeholder="Количество мест, наличие оборудования, вопросы..."></textarea></div>
-        <!-- Галочка НЕ предзаполнена: предзаполненное согласие согласием по 152-ФЗ
-             не считается — оно должно быть конкретным и осознанным. -->
-        <div class="ff full consent">
-          <label class="consent-row">
-            <input type="checkbox" id="consent" name="consent" required>
-            <span>Я согласен на обработку моих персональных данных и ознакомлен с
-              <a href="/privacy" target="_blank" rel="noopener">политикой обработки персональных данных</a></span>
-          </label>
-        </div>
-        <div class="ff full"><button type="submit" class="btn btn-primary" id="submit-btn">Отправить заявку →</button></div>
-      </form>
+      <!-- Формы здесь нет намеренно: сайт не собирает данные посетителей
+           (политика, редакция 1.2 от 10.09.2026). Обращения — по почте и телефону. -->
     </div>
   </div>
 </section>
 
-<div id="toast"></div>
 
-<!-- Баннер показывается до тех пор, пока человек не выбрал. Статистика не
-     запускается, пока он не согласился: счётчик ставит cookie, а согласие
-     на это должно быть получено заранее. -->
-<div id="cookie-bar" role="dialog" aria-label="Использование cookie">
-  <p>Мы используем файлы cookie: технические — чтобы сайт работал, и статистику
-     Яндекс.Метрики — чтобы понимать, какие страницы полезны.
-     Подробности — в <a href="/privacy">политике обработки персональных данных</a>.</p>
-  <div class="cb-actions">
-    <button type="button" id="cookie-min">Только необходимые</button>
-    <button type="button" id="cookie-ok" class="primary">Принять</button>
-  </div>
-</div>
+
 
 <footer>
   <div class="wrap foot-inner">
@@ -728,113 +702,6 @@
     });
   })();
 
-  // Редакция политики, с которой согласился человек. Менять ОДНОВРЕМЕННО с
-  // текстом в /privacy/index.html: иначе потом не докажешь, с чем он соглашался.
-  var POLICY_VERSION = '1.1';
-
-  // ── Cookie и статистика ────────────────────────────────────────────────────
-  // Счётчик грузится ТОЛЬКО после согласия: он ставит cookie, а согласие на это
-  // должно быть получено заранее. Пока номер счётчика не вписан — не грузится
-  // вообще, и это нормальное рабочее состояние, а не поломка.
-  var METRIKA_ID = '__ВПИСАТЬ_НОМЕР_СЧЁТЧИКА__';
-
-  (function () {
-    var bar = document.getElementById('cookie-bar');
-    var CHOICE = 'blaqit_cookie_choice';
-
-    function loadMetrika() {
-      if (!/^\d+$/.test(METRIKA_ID)) return; // номер не задан — счётчика нет
-      if (window.ym) return;
-      (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
-      m[i].l=1*new Date();k=e.createElement(t),a=e.getElementsByTagName(t)[0];
-      k.async=1;k.src=r;a.parentNode.insertBefore(k,a)})
-      (window,document,'script','https://mc.yandex.ru/metrika/tag.js','ym');
-      window.ym(METRIKA_ID, 'init', { clickmap:true, trackLinks:true, accurateTrackBounce:true });
-    }
-
-    function remember(value) {
-      try { localStorage.setItem(CHOICE, value); } catch (e) { /* приватный режим */ }
-      bar.style.display = 'none';
-    }
-
-    var saved = null;
-    try { saved = localStorage.getItem(CHOICE); } catch (e) { /* приватный режим */ }
-
-    if (saved === 'all') { loadMetrika(); }
-    else if (saved !== 'necessary') { bar.style.display = 'flex'; }
-
-    document.getElementById('cookie-ok').addEventListener('click', function () {
-      remember('all');
-      loadMetrika();
-    });
-    document.getElementById('cookie-min').addEventListener('click', function () {
-      remember('necessary');
-    });
-  })();
-
-  // Форма — отправка без перезагрузки, в Telegram через функцию в Яндекс.Облаке.
-  //
-  // Дубль в зарубежный Formspree убран осознанно: имя, телефон и почта человека
-  // уезжали на сервер в США. Это трансграничная передача персональных данных
-  // (ст. 12 152-ФЗ) — о ней нужно отдельно уведомлять Роскомнадзор, — и запись
-  // данных граждан РФ мимо базы в России (ч. 5 ст. 18). Ради дубля почты такой
-  // риск не берём. Заявки принимает только российская функция.
-  //
-  // Раз канал теперь один, молчание должно быть видно. Ответ функции браузеру
-  // недоступен (mode:'no-cors' — ответ «непрозрачный»), поэтому успех подтвердить
-  // нельзя, зато обрыв и зависание ловятся по времени. Прежний код не ждал ответа
-  // вообще и писал «✅ Заявка отправлена» всегда: упавшая функция означала бы
-  // потерянного клиента, о котором никто никогда не узнает — ни он, ни мы.
-  var LEAD_URL = 'https://functions.yandexcloud.net/d4eh4o4uorlb3mii1r8u';
-  var LEAD_TIMEOUT_MS = 12000;
-
-  document.getElementById('contact-form').addEventListener('submit', async function (e) {
-    e.preventDefault();
-    var btn = document.getElementById('submit-btn');
-    var form = this;
-    var toast = document.getElementById('toast');
-    var data = new URLSearchParams(new FormData(form));
-    // Согласие проверяем до отправки. Браузерная проверка — удобство, а не
-    // защита: заявку можно отправить и в обход формы, поэтому такая же проверка
-    // обязана стоять в приёмной функции Яндекс.Облака.
-    var consent = document.getElementById('consent');
-    var consentBox = consent.closest('.consent');
-    if (!consent.checked) {
-      consentBox.classList.add('missing');
-      consent.focus();
-      return;
-    }
-    consentBox.classList.remove('missing');
-    data.set('consent_accepted', '1');
-    data.set('consent_policy_version', POLICY_VERSION);
-
-    btn.textContent = 'Отправляем...';
-    btn.disabled = true;
-    try {
-      var ctl = new AbortController();
-      var timer = setTimeout(function () { ctl.abort(); }, LEAD_TIMEOUT_MS);
-      await fetch(LEAD_URL, { method: 'POST', body: data, mode: 'no-cors', signal: ctl.signal });
-      clearTimeout(timer);
-      toast.className = '';
-      // Контакты показываем и при успехе: подтвердить доставку браузер не может
-      // (ответ функции непрозрачный), а человек, чья заявка потерялась по дороге,
-      // просто решит, что мы не отвечаем, и уйдёт к другим.
-      toast.innerHTML = '✅ Заявка отправлена! Свяжемся с вами сегодня. Срочно — ' +
-        '<a href="https://t.me/Skazhi">t.me/Skazhi</a> или <a href="tel:+79775182899">+7 977 518-28-99</a>';
-      toast.style.display = 'block';
-      setTimeout(function () { toast.style.display = 'none'; }, 9000);
-      form.reset();
-      btn.textContent = '✅ Отправлено!';
-      setTimeout(function () { btn.textContent = 'Отправить заявку →'; btn.disabled = false; }, 3000);
-    } catch (err) {
-      toast.className = 'fail';
-      toast.innerHTML = 'Заявка не ушла — связи с сервером нет. Напишите нам: ' +
-        '<a href="https://t.me/Skazhi">t.me/Skazhi</a> или <a href="tel:+79775182899">+7 977 518-28-99</a>';
-      toast.style.display = 'block';
-      btn.textContent = 'Отправить заявку →';
-      btn.disabled = false;
-    }
-  });
 </script>
 </body>
 </html>
