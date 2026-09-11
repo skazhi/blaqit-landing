@@ -72,6 +72,25 @@ def content_type(path: Path) -> str:
     return "application/octet-stream"
 
 
+def cache_control(key: str) -> str:
+    """Срок жизни файла в кэше перед хранилищем.
+
+    Без этого заголовка узлы кэша выбирают срок сами — и выбирают часы:
+    11.09.2026 страница политики на одном узле показывала вчерашнюю редакцию
+    через пять часов после выкладки. Для юридического документа это не мелочь:
+    проверяющий может открыть не ту редакцию, что указана в уведомлении.
+
+    Страницы — пять минут: дольше ждать обновления не должен никто. Файлы
+    витрины из /demo/assets несут хэш в имени и не меняются никогда (меняется
+    имя) — им год. Остальное (картинки, иконки) — час.
+    """
+    if key.endswith(".html"):
+        return "public, max-age=300, must-revalidate"
+    if key.startswith("demo/assets/"):
+        return "public, max-age=31536000, immutable"
+    return "public, max-age=3600"
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--dry-run", action="store_true",
@@ -107,16 +126,24 @@ def main() -> int:
     for key, path in sorted(local.items()):
         digest = md5(path)
         if remote.get(key) == digest:
-            skipped += 1
-            continue
-        action = "изменился" if key in remote else "новый"
+            # Содержимое то же — но срок кэша хранится в метаданных объекта, а
+            # не в ETag. Файл, залитый до появления заголовка, так и лежит без
+            # него, и узлы кэша держат его часами. Сверяем и перезаливаем.
+            head = s3.head_object(Bucket=BUCKET, Key=key)
+            if head.get("CacheControl") == cache_control(key):
+                skipped += 1
+                continue
+            action = "срок кэша"
+        else:
+            action = "изменился" if key in remote else "новый"
         # Значки только из ASCII: консоль Windows живёт в cp1251 и на стрелке
         # вроде «↑» падает с ошибкой кодировки прямо посреди выкладки.
         print(f"  [+] {key} ({action})")
         if not args.dry_run:
             with path.open("rb") as f:
                 s3.put_object(Bucket=BUCKET, Key=key, Body=f,
-                              ContentType=content_type(path))
+                              ContentType=content_type(path),
+                              CacheControl=cache_control(key))
         uploaded += 1
 
     for key in sorted(set(remote) - set(local)):
