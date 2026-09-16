@@ -1,0 +1,3 @@
+# Ключи хостинга Selectel для ручной выкладки (deploy_to_selectel.py) — в git не попадают
+.env*
+__pycache__/

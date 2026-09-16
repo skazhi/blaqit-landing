@@ -1,0 +1,1 @@
+import{u as n,w as f}from"./xlsx-C2K9OxTh.js";const a=(e,h,r)=>{const s=n.json_to_sheet(e);if(e.length>0){const p=Object.keys(e[0]).map(l=>{let o=l.length;return e.forEach(w=>{const t=w[l];if(t!=null){const i=String(t).length;i>o&&(o=i)}}),{wch:Math.min(o+2,60)}});s["!cols"]=p}const c=n.book_new();n.book_append_sheet(c,s,h),f(c,r)};export{a as e};
