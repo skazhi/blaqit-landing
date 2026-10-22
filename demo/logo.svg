@@ -8,9 +8,20 @@
        Шрифт задан тем же стеком, что интерфейс (src/index.css), чтобы логотип
        всегда совпадал с CRM. Если понадобится независимость от шрифта на
        устройстве — перевести надпись в кривые.
+       Светлая тема: CRM запрашивает этот же файл как «logo.svg#light», и
+       правило :target ниже красит «blaqit» тёмным (брендбук, п. 2). Картинка
+       не видит тему страницы, поэтому вариант живёт в самом файле, а не
+       вторым файлом — иначе при замене логотипа клиент забыл бы второй, и в
+       светлой теме показывался бы чужой бренд (см. components/BrandLogo.tsx).
        При продаже другой сети файл заменяется целиком, см. BRANDING.md. -->
-  <text x="0" y="46"
-        font-family="Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif"
-        font-size="42" font-weight="700" letter-spacing="-1" fill="#f4f4f5"
-        >blaqit<tspan fill="#dcae4c">.CRM</tspan></text>
+  <style>
+    .word { fill: #f4f4f5; }
+    #light:target .word { fill: #18181b; }
+  </style>
+  <g id="light">
+    <text x="0" y="46" class="word"
+          font-family="Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif"
+          font-size="42" font-weight="700" letter-spacing="-1"
+          >blaqit<tspan fill="#dcae4c">.CRM</tspan></text>
+  </g>
 </svg>

@@ -13,8 +13,11 @@
          Примечание: frame-ancestors (антиклик­джекинг) через <meta> не действует —
          это отдельный заголовок на nginx (бэклог). -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' 'unsafe-eval' https://api-maps.yandex.ru https://yastatic.net https://*.maps.yandex.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://api-maps.yandex.ru https://*.maps.yandex.net https://*.yandex.net https://yastatic.net; worker-src 'self' blob:" />
-    <!-- Telegram Mini App SDK: свой хостинг (не telegram.org) + async — ноль внешних зависимостей при загрузке. -->
-    <script async src="/demo/telegram-web-app.js"></script>
+    <!-- Telegram Mini App SDK здесь НЕ подключаем. Файл весит 114 КБ, а нужен
+         только внутри Телеграма — в обычном браузере он отнимал канал у
+         основного кода и откладывал первый экран. Грузит его src/utils/telegram.ts,
+         и только если CRM действительно открыта в Телеграме. Хостинг свой
+         (не telegram.org): внешних зависимостей при загрузке по-прежнему ноль. -->
     <link rel="icon" type="image/svg+xml" href="/demo/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
@@ -57,12 +60,19 @@
       #boot .why { display: none; max-width: 30rem; padding: 0 1.5rem; text-align: center;
         color: #cbd5e1; font: 15px/1.5 -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
       #boot .why b { color: #fff; display: block; margin-bottom: .5rem; font-size: 17px; }
-      #boot .why code { color: #94a3b8; font-size: 12px; word-break: break-all; }
+      #boot .why code { color: #94a3b8; font-size: 12px; word-break: break-all; white-space: pre-wrap; display: block; text-align: left; }
+      #boot .why button { margin-top: 1rem; padding: .6rem 1.4rem; font-size: 15px; cursor: pointer;
+        color: #0B0E14; background: #dcae4c; border: 0; border-radius: 8px; }
+      /* Причина всегда одна из двух, и показывается ровно та, что установлена. */
+      #boot .why .cause { display: none; }
       #boot.stuck .ring { display: none; }
       #boot.stuck .why { display: block; }
+      #boot.stuck-slow .why .cause-slow { display: block; }
+      #boot.stuck-old .why .cause-old { display: block; }
     </style>
-    <script type="module" crossorigin src="/demo/assets/index-ktAwkNzq.js"></script>
-    <link rel="stylesheet" crossorigin href="/demo/assets/index-D03E-0tq.css">
+    <script type="module" crossorigin src="/demo/assets/index-BrFyy04T.js"></script>
+    <link rel="modulepreload" crossorigin href="/demo/assets/engine-BJQjgzEi.js">
+    <link rel="stylesheet" crossorigin href="/demo/assets/index-DAy9O4EF.css">
   </head>
   <body>
     <div id="root">
@@ -71,13 +81,31 @@
         <!-- Если приложение не запустилось, человек видел бесконечную крутилку и
              говорил «не открывается» — понять причину было нельзя ни ему, ни нам.
              Через 20 секунд показываем, что именно произошло, и версию браузера:
-             по скриншоту сразу видно, дело в старом телефоне или в сети. -->
+             по скриншоту сразу видно, дело в телефоне или в связи.
+
+             ⚠️ Причин ДВЕ, и до 22.09.2026 назывался только «устаревший браузер».
+             Это неправда в большинстве случаев: телефон, который понимает
+             современный код, просто не успел скачать приложение по медленной
+             связи. Текст, обвиняющий браузер, уводил разбор в сторону — человек
+             шёл обновлять Safari, а причина была в загрузке. Какая из двух —
+             решает boot-check.js по тому, понимает ли браузер модули. -->
         <div class="why">
-          <b>Не удалось запустить приложение</b>
-          Чаще всего это устаревший браузер на телефоне. Откройте
-          <b style="display:inline">crm.kovcheghostel.ru</b> в Chrome
-          (Android) или Safari (iPhone) и обновите его в магазине приложений.
-          Если открываете из Telegram — попробуйте пункт «Открыть в браузере».
+          <div class="cause cause-slow">
+            <b>Приложение ещё не загрузилось</b>
+            Похоже, связь медленная или сервер не отвечает. Подождите ещё немного
+            или нажмите «Повторить». Включён VPN — выключите его или добавьте
+            CRM в исключения VPN; на мобильном интернете попробуйте Wi-Fi, на
+            Wi-Fi — мобильный интернет. Если в этом месте всегда долго — скажите
+            администратору, дело не в вашем телефоне.
+          </div>
+          <div class="cause cause-old">
+            <b>Не удалось запустить приложение</b>
+            Браузер на этом телефоне слишком старый. Откройте
+            этот же адрес в Chrome
+            (Android) или Safari (iPhone) и обновите его в магазине приложений.
+            Если открываете из Telegram — попробуйте пункт «Открыть в браузере».
+          </div>
+          <button type="button" id="boot-retry">Повторить</button>
           <br /><br />
           Покажите этот экран администратору:
           <br /><code id="boot-ua"></code>
@@ -86,6 +114,6 @@
     </div>
     <!-- Отдельным файлом, а не инлайном: CSP страницы намеренно запрещает
          инлайновые скрипты (защита от XSS). -->
-    <script src="/demo/boot-check.js"></script>
+    <script src="/demo/boot-check.js"></script>
   </body>
 </html>
