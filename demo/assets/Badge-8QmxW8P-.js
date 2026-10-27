@@ -1,0 +1,1 @@
+import{j as d}from"./engine-HO4ryKUt.js";const g={neutral:"badge-neutral",brand:"badge-brand",success:"badge-success",warning:"badge-warning",danger:"badge-danger",info:"badge-info"};function t({tone:a="neutral",children:n,className:e="",...s}){const r=["badge",g[a],e].filter(Boolean).join(" ");return d.jsx("span",{className:r,...s,children:n})}export{t as B};
