@@ -1,0 +1,1 @@
+import{j as s}from"./engine-Bvu9AmF8.js";import{P as e}from"./PageHeader-DSEt2Xpf.js";import{U as o}from"./index-m7hxj6Me.js";import{M as r}from"./MyProfile-Gp8U7Kp4.js";const f=()=>s.jsxs("div",{className:"page-container",children:[s.jsx(e,{icon:s.jsx(o,{size:22}),title:"Мой профиль",subtitle:"Свой пароль, автовыход и оформление"}),s.jsx(r,{})]});export{f as default};
